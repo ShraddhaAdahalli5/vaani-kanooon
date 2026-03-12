@@ -14,6 +14,9 @@ class SimplifyResponse(BaseModel):
     success: bool
     simplified_text: str
     translated_text: Optional[str] = None
+    summary: Optional[str] = None
+    key_points: Optional[List[str]] = []
+    processing_method: Optional[str] = None
     error: Optional[str] = None
 
 class ChatMessage(BaseModel):
@@ -23,11 +26,13 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     document_context: str
+    target_language: Optional[str] = "hindi"
     conversation_history: Optional[List[ChatMessage]] = []
 
 class ChatResponse(BaseModel):
     success: bool
     response: str
+    processing_method: Optional[str] = None
     conversation_id: Optional[str] = None
     error: Optional[str] = None
 

@@ -3,19 +3,16 @@ from typing import List
 
 from app.models import SimplifyRequest, SimplifyResponse, ChatRequest, ChatResponse, ChatMessage
 from app.services.ai_service import ai_service
+from app.services.offline_ai_service import OfflineAIService
 
 router = APIRouter()
+
+# Initialize offline AI service
+offline_ai_service = OfflineAIService()
 
 @router.post("/simplify", response_model=SimplifyResponse)
 async def simplify_legal_text(request: SimplifyRequest):
     """Simplify legal text and optionally translate to target language"""
-    
-    if not ai_service:
-        return SimplifyResponse(
-            success=False,
-            simplified_text="",
-            error="AI service is not available. Please configure OpenAI API key."
-        )
     
     if not request.text or not request.text.strip():
         return SimplifyResponse(
@@ -25,15 +22,19 @@ async def simplify_legal_text(request: SimplifyRequest):
         )
     
     try:
-        simplified_text, translated_text = await ai_service.simplify_legal_text(
+        # Try offline service first (for rural areas)
+        result = offline_ai_service.process_legal_document(
             request.text, 
-            request.target_language
+            request.target_language or "hindi"
         )
         
         return SimplifyResponse(
             success=True,
-            simplified_text=simplified_text,
-            translated_text=translated_text
+            simplified_text=result.get("simplified_text", ""),
+            translated_text=result.get("translated_text", ""),
+            summary=result.get("summary", ""),
+            key_points=result.get("key_points", []),
+            processing_method="offline"
         )
         
     except Exception as e:
@@ -46,13 +47,6 @@ async def simplify_legal_text(request: SimplifyRequest):
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_ai(request: ChatRequest):
     """Chat with AI about the document"""
-    
-    if not ai_service:
-        return ChatResponse(
-            success=False,
-            response="",
-            error="AI service is not available. Please configure OpenAI API key."
-        )
     
     if not request.message or not request.message.strip():
         return ChatResponse(
@@ -69,23 +63,17 @@ async def chat_with_ai(request: ChatRequest):
         )
     
     try:
-        # Convert Pydantic models to dict for AI service
-        conversation_history = []
-        if request.conversation_history:
-            conversation_history = [
-                ChatMessage(role=msg.role, content=msg.content)
-                for msg in request.conversation_history
-            ]
-        
-        response = await ai_service.chat_about_document(
+        # Use offline chat service for rural areas
+        response = offline_ai_service.chat_about_document(
             request.message,
             request.document_context,
-            conversation_history
+            request.target_language or "hindi"
         )
         
         return ChatResponse(
             success=True,
-            response=response
+            response=response,
+            processing_method="offline"
         )
         
     except Exception as e:
@@ -95,15 +83,39 @@ async def chat_with_ai(request: ChatRequest):
             error=f"Chat failed: {str(e)}"
         )
 
+@router.get("/languages", response_model=LanguagesResponse)
+async def get_supported_languages():
+    """Get list of supported regional languages"""
+    try:
+        languages = offline_ai_service.get_supported_languages()
+        return LanguagesResponse(
+            success=True,
+            languages=[
+                Language(code=lang["code"], name=lang["name"], native_name=lang["native"])
+                for lang in languages
+            ]
+        )
+    except Exception as e:
+        return LanguagesResponse(
+            success=False,
+            languages=[],
+            error=f"Failed to get languages: {str(e)}"
+        )
+
 @router.get("/status")
 async def get_ai_status():
     """Check AI service status"""
     return {
         "success": True,
-        "ai_available": ai_service is not None,
+        "ai_available": True,
+        "processing_method": "offline",
         "services": {
-            "text_simplification": ai_service is not None,
-            "translation": ai_service is not None,
-            "chat": ai_service is not None
-        }
+            "text_simplification": True,
+            "translation": True,
+            "chat": True,
+            "ocr": True
+        },
+        "supported_languages": offline_ai_service.get_supported_languages(),
+        "internet_required": False,
+        "rural_compatible": True
     }
