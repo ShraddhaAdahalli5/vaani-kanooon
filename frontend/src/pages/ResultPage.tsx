@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, MessageCircle, Volume2, Download, Loader2, Globe, BookOpen } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Volume2, Download, Loader2, Globe, BookOpen, Wifi, WifiOff } from 'lucide-react';
+import { documentAPI } from '../services/api';
 
 interface ResultState {
   extractedText: string;
@@ -13,11 +14,16 @@ const ResultPage: React.FC = () => {
   
   const [simplifiedText, setSimplifiedText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('kannada');
+  const [summary, setSummary] = useState('');
+  const [keyPoints, setKeyPoints] = useState<string[]>([]);
+  const [processingMethod, setProcessingMethod] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('english');
   const [isProcessing, setIsProcessing] = useState(true);
   const [chatMessages, setChatMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [aiStatus, setAiStatus] = useState<any>(null);
 
   const languages = [
     { code: 'kannada', name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
@@ -33,97 +39,102 @@ const ResultPage: React.FC = () => {
       return;
     }
 
-    // Simulate AI processing
-    setTimeout(() => {
-      // Mock simplified text
-      setSimplifiedText(`This is a simple property sale agreement made on January 1, 2024, between two parties.
+    const processDocument = async () => {
+      try {
+        // Get AI status and supported languages
+        const [statusResponse, languagesResponse] = await Promise.all([
+          documentAPI.getAIStatus(),
+          documentAPI.getSupportedLanguages()
+        ]);
 
-**What this means:**
-- Party A owns a property in a rural village
-- Party B wants to buy this property for ₹5,00,000 (5 lakh rupees)
-- Party B must pay 20% (₹1,00,000) as advance payment
-- The sale must be completed within 90 days
-- Party A guarantees they legally own the property
+        if (statusResponse.success) {
+          setAiStatus(statusResponse);
+        }
 
-**Your Rights:**
-- As the buyer, you have the right to clear property ownership
-- You have 90 days to complete the purchase
-- The seller must have proper legal documents
+        if (languagesResponse.success) {
+          setSupportedLanguages(languagesResponse.languages);
+        }
 
-**Important Points:**
-- Make sure to verify all property documents
-- Keep records of all payments
-- Consider getting legal advice before signing
+        // Process the document with offline AI
+        const response = await documentAPI.simplifyText({
+          text: state.extractedText,
+          target_language: selectedLanguage
+        });
 
-**What to Watch For:**
-- Hidden fees or additional costs
-- Property boundary disputes
-- Any existing loans on the property`);
+        if (response.success) {
+          setSimplifiedText(response.simplified_text);
+          setTranslatedText(response.translated_text || '');
+          setSummary(response.summary || '');
+          setKeyPoints(response.key_points || []);
+          setProcessingMethod(response.processing_method || 'offline');
+        } else {
+          alert(`Processing failed: ${response.error}`);
+        }
+      } catch (error) {
+        console.error('Processing error:', error);
+        alert('Failed to process document. Please try again.');
+      } finally {
+        setIsProcessing(false);
+      }
+    };
 
-      // Mock translated text
-      setTranslatedText(`ಇದು ಜನವರಿ 1, 2024 ರಂದು ಎರಡು ಪಕ್ಷಗಳ ನಡುವೆ ಮಾಡಿಕೊಂಡ ಸರಳ ಆಸ್ತಿ ಮಾರಾಟ ಒಪ್ಪಂದವಾಗಿದೆ.
+    processDocument();
+  }, [state?.extractedText, navigate, selectedLanguage]);
 
-**ಇದರ ಅರ್ಥ ಏನು:**
-- ಪಕ್ಷ A ಗ್ರಾಮೀಣ ಹಳ್ಳಿಯಲ್ಲಿ ಆಸ್ತಿಯನ್ನು ಹೊಂದಿದ್ದಾರೆ
-- ಪಕ್ಷ B ಈ ಆಸ್ತಿಯನ್ನು ₹5,00,000 (ಐದು ಲಕ್ಷ ರೂಪಾಯಿಗಳಿಗೆ) ಖರೀದಿಸಲು ಬಯಸುತ್ತಾರೆ
-- ಪಕ್ಷ B 20% (₹1,00,000) ಅಗ್ರಿಮ ಪಾವತಿಯಾಗಿ ಪಾವತಿಸಬೇಕು
-- ಮಾರಾಟವನ್ನು 90 ದಿನಗಳೊಳಗೆ ಪೂರ್ಣಗೊಳಿಸಬೇಕು
-- ಪಕ್ಷ A ಅವರು ಕಾನೂನುಬದ್ಧವಾಗಿ ಆಸ್ತಿಯನ್ನು ಹೊಂದಿದ್ದಾರೆ ಎಂದು ಖಾತರಿಪಡಿಸುತ್ತಾರೆ
-
-**ನಿಮ್ಮ ಹಕ್ಕುಗಳು:**
-- ಖರೀದಿದಾರರಾಗಿ, ನಿಮಗೆ ಸ್ಪಷ್ಟ ಆಸ್ತಿ ಮಾಲೀಕತ್ವದ ಹಕ್ಕು ಇದೆ
-- ಖರೀದಿಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು ನಿಮಗೆ 90 ದಿನಗಳು ಇವೆ
-- ಮಾರಾಟಗಾರರು ಸರಿಯಾದ ಕಾನೂನು ದಾಖಲೆಗಳನ್ನು ಹೊಂದಿರಬೇಕು
-
-**ಪ್ರಮುಖ ಅಂಶಗಳು:**
-- ಎಲ್ಲಾ ಆಸ್ತಿ ದಾಖಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ
-- ಎಲ್ಲಾ ಪಾವತಿಗಳ ದಾಖಲೆಗಳನ್ನು ಇರಿಸಿಕೊಳ್ಳಿ
-- ಸಹಿ ಮಾಡುವ ಮೊದಲು ಕಾನೂನು ಸಲಹೆ ಪಡೆಯಿರಿ ಪರಿಗಣಿಸಿ
-
-**ಗಮನಿಸಬೇಕಾದ ವಿಷಯಗಳು:**
-- ಮರೆಮಾಚಿದ ಶುಲ್ಕಗಳು ಅಥವಾ ಹೆಚ್ಚುವರಿ ವೆಚ್ಚಗಳು
-- ಆಸ್ತಿ ಗಡಿ ವಿವಾದಗಳು
-- ಆಸ್ತಿಯ ಮೇಲೆ ಯಾವುದೇ ಸಾಲಗಳು ಇರುವುದು`);
-
-      setIsProcessing(false);
-    }, 3000);
-  }, [state, navigate]);
-
-  const handleLanguageChange = (languageCode: string) => {
+  const handleLanguageChange = async (languageCode: string) => {
     setSelectedLanguage(languageCode);
-    // Simulate translation
+    if (!state?.extractedText) return;
+    
     setIsProcessing(true);
-    setTimeout(() => {
-      // In real app, this would call translation API
-      setTranslatedText(`Translation in ${languageCode} would appear here...`);
+    try {
+      const response = await documentAPI.simplifyText({
+        text: state.extractedText,
+        target_language: languageCode
+      });
+
+      if (response.success) {
+        setSimplifiedText(response.simplified_text);
+        setTranslatedText(response.translated_text || '');
+        setSummary(response.summary || '');
+        setKeyPoints(response.key_points || []);
+        setProcessingMethod(response.processing_method || 'offline');
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      alert('Failed to translate. Please try again.');
+    } finally {
       setIsProcessing(false);
-    }, 1500);
+    }
   };
 
   const handleSendMessage = async () => {
-    if (!currentMessage.trim()) return;
+    if (!currentMessage.trim() || !state?.extractedText) return;
 
     const userMessage = currentMessage;
     setCurrentMessage('');
     setIsChatLoading(true);
 
     // Add user message
-    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setChatMessages((prev: any[]) => [...prev, { role: 'user', content: userMessage }]);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = `Based on the document, ${userMessage.toLowerCase().includes('rights') 
-        ? 'you have the right to clear property ownership and proper documentation. The seller must provide all legal papers and clear title.'
-        : userMessage.toLowerCase().includes('safe')
-        ? 'this agreement appears standard for property sales. However, I recommend verifying all property documents and getting legal advice before signing.'
-        : userMessage.toLowerCase().includes('mean')
-        ? 'this is a property sale agreement where Party A is selling rural property to Party B for ₹5,00,000 with 20% advance payment.'
-        : 'that\'s a good question about the document. Let me explain that this agreement outlines the terms for purchasing rural property with specific payment terms and timeline.'
-      }`;
-      
-      setChatMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+    try {
+      const response = await documentAPI.chatWithAI({
+        message: userMessage,
+        document_context: state.extractedText,
+        target_language: selectedLanguage
+      });
+
+      if (response.success) {
+        setChatMessages((prev: any[]) => [...prev, { role: 'assistant', content: response.response }]);
+      } else {
+        setChatMessages((prev: any[]) => [...prev, { role: 'assistant', content: 'Sorry, I could not process your question. Please try again.' }]);
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      setChatMessages((prev: any[]) => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
+    } finally {
       setIsChatLoading(false);
-    }, 2000);
+    }
   };
 
   const handleVoiceOutput = () => {

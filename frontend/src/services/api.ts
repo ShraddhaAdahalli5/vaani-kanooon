@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://vani-kanoon-api.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://vaani-kanooon.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -25,18 +25,23 @@ export interface SimplifyResponse {
   success: boolean;
   simplified_text: string;
   translated_text?: string;
+  summary?: string;
+  key_points?: string[];
+  processing_method?: string;
   error?: string;
 }
 
 export interface ChatRequest {
   message: string;
   document_context: string;
+  target_language?: string;
   conversation_history?: Array<{ role: string; content: string }>;
 }
 
 export interface ChatResponse {
   success: boolean;
   response: string;
+  processing_method?: string;
   conversation_id?: string;
   error?: string;
 }
@@ -97,7 +102,7 @@ export const documentAPI = {
   // Get supported languages
   getSupportedLanguages: async () => {
     try {
-      const response = await api.get('/api/languages');
+      const response = await api.get('/api/ai/languages');
       return response.data;
     } catch (error) {
       console.error('Languages fetch error:', error);
@@ -105,6 +110,21 @@ export const documentAPI = {
         success: false,
         languages: [],
         error: 'Failed to fetch supported languages',
+      };
+    }
+  },
+
+  // Get AI status
+  getAIStatus: async () => {
+    try {
+      const response = await api.get('/api/ai/status');
+      return response.data;
+    } catch (error) {
+      console.error('AI status fetch error:', error);
+      return {
+        success: false,
+        ai_available: false,
+        error: 'Failed to fetch AI status',
       };
     }
   },

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Upload, FileText, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Upload, FileText, Loader2, ArrowLeft, CheckCircle, Wifi, WifiOff } from 'lucide-react';
+import { documentAPI } from '../services/api';
 
 const UploadPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -42,27 +43,22 @@ const UploadPage: React.FC = () => {
 
     setIsUploading(true);
     
-    // Simulate file upload and OCR processing
-    setTimeout(() => {
-      // Mock extracted text
-      const mockText = `This Agreement is made and entered into on this 1st day of January, 2024, between Party A and Party B. 
+    try {
+      // Use real API for OCR processing
+      const response = await documentAPI.uploadDocument(file);
       
-      WHEREAS, Party A is the owner of the property situated at Rural Village, District, and Party B wishes to purchase the said property;
-      
-      WHEREAS, the parties have agreed to the terms and conditions set forth herein;
-      
-      NOW, THEREFORE, in consideration of the mutual covenants contained herein, the parties agree as follows:
-      
-      1. Party A agrees to sell and Party B agrees to purchase the property for a total consideration of ₹5,00,000.
-      2. Party B shall pay 20% of the consideration as advance payment.
-      3. The sale shall be completed within 90 days from the date of this agreement.
-      4. Party A warrants that they have clear title to the property.
-      5. This agreement shall be governed by the laws of India.`;
-      
-      setExtractedText(mockText);
+      if (response.success) {
+        setExtractedText(response.extracted_text);
+        setUploadComplete(true);
+      } else {
+        alert(`Upload failed: ${response.error}`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Upload failed. Please try again.');
+    } finally {
       setIsUploading(false);
-      setUploadComplete(true);
-    }, 3000);
+    }
   };
 
   const handleSimplifyAndTranslate = () => {
