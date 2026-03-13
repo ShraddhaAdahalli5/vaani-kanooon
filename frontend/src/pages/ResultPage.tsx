@@ -24,8 +24,10 @@ const ResultPage: React.FC = () => {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
   const [aiStatus, setAiStatus] = useState<any>(null);
+  const [translationCache, setTranslationCache] = useState<{[key: string]: any}>({});
 
   const languages = [
+    { code: 'english', name: 'English', nativeName: 'English' },
     { code: 'kannada', name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
     { code: 'hindi', name: 'Hindi', nativeName: 'हिंदी' },
     { code: 'marathi', name: 'Marathi', nativeName: 'मराठी' },
@@ -55,6 +57,19 @@ const ResultPage: React.FC = () => {
           setSupportedLanguages(languagesResponse.languages);
         }
 
+        // Check cache for initial processing
+        const cacheKey = `${selectedLanguage}_${state.extractedText.substring(0, 100)}`;
+        if (translationCache[cacheKey]) {
+          const cached = translationCache[cacheKey];
+          setSimplifiedText(cached.simplified_text);
+          setTranslatedText(cached.translated_text || '');
+          setSummary(cached.summary || '');
+          setKeyPoints(cached.key_points || []);
+          setProcessingMethod(cached.processing_method || 'offline');
+          setIsProcessing(false);
+          return;
+        }
+
         // Process the document with offline AI
         const response = await documentAPI.simplifyText({
           text: state.extractedText,
@@ -62,6 +77,12 @@ const ResultPage: React.FC = () => {
         });
 
         if (response.success) {
+          // Cache the response
+          setTranslationCache(prev => ({
+            ...prev,
+            [cacheKey]: response
+          }));
+          
           setSimplifiedText(response.simplified_text);
           setTranslatedText(response.translated_text || '');
           setSummary(response.summary || '');
@@ -85,6 +106,18 @@ const ResultPage: React.FC = () => {
     setSelectedLanguage(languageCode);
     if (!state?.extractedText) return;
     
+    // Check cache first
+    const cacheKey = `${languageCode}_${state.extractedText.substring(0, 100)}`; // Cache based on language + text start
+    if (translationCache[cacheKey]) {
+      const cached = translationCache[cacheKey];
+      setSimplifiedText(cached.simplified_text);
+      setTranslatedText(cached.translated_text || '');
+      setSummary(cached.summary || '');
+      setKeyPoints(cached.key_points || []);
+      setProcessingMethod(cached.processing_method || 'offline');
+      return;
+    }
+    
     setIsProcessing(true);
     try {
       const response = await documentAPI.simplifyText({
@@ -93,6 +126,12 @@ const ResultPage: React.FC = () => {
       });
 
       if (response.success) {
+        // Cache the response
+        setTranslationCache(prev => ({
+          ...prev,
+          [cacheKey]: response
+        }));
+        
         setSimplifiedText(response.simplified_text);
         setTranslatedText(response.translated_text || '');
         setSummary(response.summary || '');
