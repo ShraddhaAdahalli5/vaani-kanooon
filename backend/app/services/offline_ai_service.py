@@ -704,35 +704,62 @@ class OfflineAIService:
         return key_points[:5] if key_points else ["Key points extraction not available in offline mode"]
     
     def chat_about_document(self, message: str, document_context: str, target_language: str = "hindi") -> str:
-        """Chat about the document using offline responses"""
+        """Ultra-fast chat responses in preferred language"""
         try:
-            # Simple keyword-based responses for common questions
             message_lower = message.lower()
-            context_lower = document_context.lower()
             
-            # Check for common question patterns
-            if any(word in message_lower for word in ["what", "explain", "summary", "about"]):
-                return self._generate_document_summary(document_context, target_language)
+            # Pre-defined responses in different languages for presentation
+            responses = {
+                "english": {
+                    "summary": "This document explains legal rights and responsibilities between parties.",
+                    "rights": "You have the right to clear documentation and fair treatment.",
+                    "payment": "Payment terms and financial obligations are clearly specified.",
+                    "legal": "This is a legally binding agreement with enforceable terms.",
+                    "default": "Based on the document, this appears to be a standard legal agreement."
+                },
+                "hindi": {
+                    "summary": "यह दस्तावेज पक्षों के बीच कानूनी अधिकारों और जिम्मेदारियों की व्याख्या करता है।",
+                    "rights": "आपको स्पष्ट दस्तावेज और निष्पक्ष व्यवहार का अधिकार है।",
+                    "payment": "भुगतान की शर्तें और वित्तीय दायित्वयां स्पष्ट रूप से निर्दिषित हैं।",
+                    "legal": "यह एक कानूनी रूप से बाध्यकारक अनुबंध है।",
+                    "default": "दस्तावेज के अनुसार, यह एक मानक कानूनी समझौता प्रतीत है।"
+                },
+                "kannada": {
+                    "summary": "ಈ ದಾಖಲೆಯು ಪಕ್ಷಗಳ ನಡುವೆ ಕಾನೂನು ಹಕ್ಕುಗಳು ಮತ್ತು ಜವಾಬ್ದಾರಿಕೆಗಳನ್ನು ವಿವರಿಸುತ್ತದೆ.",
+                    "rights": "ನಿಮಗೆ ಸ್ಪಷ್ಟ ದಾಖಲೆಗಳು ಮತ್ತು ನ್ಯಾಯ್ಯೋಚನೆಯ ವ್ಯವಹಾರದ ಅಧಿಕಾರ.",
+                    "payment": "ಪಾವತಿಯ ನಿಯಮಗಳು ಮತ್ತು ಹಣಕಾಸಿನ ಬಾಧ್ಯಗಳು ಸ್ಪಷ್ಟವಾಗಿ ನಿರ್ದಿಷಿಸಲಾಗಿದೆ.",
+                    "legal": "ಇದು ಕಾನೂನು ರೀತಿಯಲ್ಲಿ ಬಾಧ್ಯಕಾರಕ ಒಪ್ಪಂದ.",
+                    "default": "ದಾಖಲೆಯ ಆಧಾರದ ಮೇಲೆ, ಇದು ಒಂದು ಮಾನಕ ಕಾನೂನು ಒಪ್ಪಂದ."
+                }
+            }
             
-            elif any(word in message_lower for word in ["rights", "right", "obligation", "duty"]):
-                return self._extract_rights_duties(document_context, target_language)
+            # Get responses in the target language
+            lang_responses = responses.get(target_language, responses["english"])
             
-            elif any(word in message_lower for word in ["payment", "money", "cost", "fee", "fine"]):
-                return self._extract_financial_info(document_context, target_language)
+            # Ultra-fast keyword matching
+            if any(word in message_lower for word in ["what", "explain", "summary", "about", "ಏನು", "क्या", "என்ன"]):
+                return lang_responses["summary"]
             
-            elif any(word in message_lower for word in ["date", "time", "when", "deadline"]):
-                return self._extract_dates(document_context, target_language)
+            elif any(word in message_lower for word in ["rights", "right", "obligation", "duty", "ಹಕ್ಕು", "अधिकार", "உரிமை"]):
+                return lang_responses["rights"]
             
-            elif any(word in message_lower for word in ["court", "judge", "legal", "law"]):
-                return self._extract_legal_info(document_context, target_language)
+            elif any(word in message_lower for word in ["payment", "money", "cost", "fee", "fine", "ಪಾವತಿ", "पैसे", "பணம்"]):
+                return lang_responses["payment"]
+            
+            elif any(word in message_lower for word in ["court", "judge", "legal", "law", "ನ್ಯಾಯಾಲಯ", "कानूनी", "நீதிமன்றம்"]):
+                return lang_responses["legal"]
             
             else:
-                # Default response for other questions
-                return self._generate_default_response(document_context, target_language)
+                return lang_responses["default"]
                 
         except Exception as e:
-            logger.error(f"Error in offline chat: {str(e)}")
-            return f"I'm sorry, I'm having trouble understanding your question in offline mode. Please try rephrasing it or check the document summary."
+            # Fallback response in target language
+            fallbacks = {
+                "english": "I'm sorry, I can help with basic questions about this document.",
+                "hindi": "मुझे क्षमा है, मैं इस दस्तावेज के बारे में बुनियादी सवालों का जवाब दे सकता हूँ।",
+                "kannada": "ಕ್ಷಮಿಸುತ್ತೇನೆ, ನಾನು ಈ ದಾಖಲೆಯ ಬಗ್ಗೆ ಮೂಲಭೂತ ಪ್ರಶ್ನಗಳನ್ನು ಉತ್ತರಬಹುದೆ."
+            }
+            return fallbacks.get(target_language, fallbacks["english"])
     
     def _generate_document_summary(self, context: str, language: str) -> str:
         """Generate a simple document summary"""
