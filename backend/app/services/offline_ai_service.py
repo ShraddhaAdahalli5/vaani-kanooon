@@ -230,6 +230,7 @@ class OfflineAIService:
                 "are": "हैं",
                 "was": "था",
                 "were": "थे",
+                "be": "होना",
                 "have": "है",
                 "has": "है",
                 "had": "था",
@@ -248,6 +249,55 @@ class OfflineAIService:
                 "her": "उसकी",
                 "our": "हमारा",
                 "their": "उनका",
+                "party": "पक्ष",
+                "parties": "पक्ष",
+                "agreement": "समझौता",
+                "contract": "अनुबंध",
+                "shall": "गा",
+                "must": "जरूरी",
+                "may": "सकता",
+                "will": "करेगा",
+                "would": "होगा",
+                "should": "चाहिए",
+                "could": "सकता",
+                "can": "सकता",
+                "made": "बनाया",
+                "entered": "दाखिल",
+                "between": "के बीच",
+                "owner": "मालिक",
+                "situated": "स्थित",
+                "wishes": "चाहता",
+                "purchase": "खरीद",
+                "said": "कहा",
+                "property": "संपत्ति",
+                "consideration": "विचार",
+                "total": "कुल",
+                "advance": "अग्रिम",
+                "payment": "भुगतान",
+                "within": "के भीतर",
+                "days": "दिन",
+                "date": "तिथि",
+                "warrants": "गारंटी",
+                "clear": "स्पष्ट",
+                "title": "शीर्षक",
+                "governed": "शासित",
+                "laws": "कानून",
+                "india": "भारत",
+                "whereas": "जबकि",
+                "thereof": "उसके",
+                "herein": "इसमें",
+                "mutual": "पारस्परिक",
+                "covenants": "वादे",
+                "contained": "समाहित",
+                "follows": "निम्नलिखित",
+                "sell": "बेचना",
+                "buy": "खरीदना",
+                "complete": "पूरा",
+                "ensure": "सुनिश्चित",
+                "proper": "उचित",
+                "legal": "कानूनी",
+                "documentation": "दस्तावेज",
+                "papers": "कागजात",
             },
             "kannada": {
                 "legal document": "ಕಾನೂನು ದಾಖಲೆ",
@@ -464,15 +514,27 @@ class OfflineAIService:
         if not text or not translations:
             return text
         
+        # Debug: Log translation start
+        import logging
+        logger = logging.getLogger(__name__)
+        
         # Split and translate in one pass
         result_words = []
+        word_count = 0
+        translated_count = 0
+        
         for word in text.split():
+            word_count += 1
             # Minimal cleaning for speed
             clean_word = word.lower().strip('.,!?;:"()[]{}')
             if clean_word and clean_word in translations:
                 result_words.append(translations[clean_word])
+                translated_count += 1
             else:
                 result_words.append(word)
+        
+        # Debug: Log translation stats
+        logger.info(f"Translation: {word_count} words, {translated_count} translated")
         
         return ' '.join(result_words)
     
