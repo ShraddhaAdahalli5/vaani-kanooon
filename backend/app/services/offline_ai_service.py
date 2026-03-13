@@ -443,7 +443,7 @@ class OfflineAIService:
         return '. '.join(simplified_sentences)
     
     def translate_to_regional_language(self, text: str, target_language: str) -> str:
-        """Ultra-fast translation using optimized processing"""
+        """Lightning-fast translation using optimized processing"""
         if not text:
             return ""
         
@@ -456,48 +456,25 @@ class OfflineAIService:
         
         translations = self.regional_translations[target_language]
         
-        # For very short texts, process immediately
-        if len(text) < 50:
-            return self._translate_short_text(text, translations)
-        
-        # For longer texts, use sentence-based processing
-        sentences = text.split('. ')
-        translated_sentences = []
-        
-        for sentence in sentences:
-            if sentence.strip():
-                translated_sentence = self._translate_sentence(sentence.strip(), translations)
-                translated_sentences.append(translated_sentence)
-        
-        return '. '.join(translated_sentences)
+        # Ultra-fast direct translation
+        return self._ultra_fast_translate(text, translations)
     
-    def _translate_short_text(self, text: str, translations: Dict[str, str]) -> str:
-        """Fast translation for short texts"""
-        words = text.split()
-        translated_words = []
+    def _ultra_fast_translate(self, text: str, translations: Dict[str, str]) -> str:
+        """Ultra-fast direct translation"""
+        if not text or not translations:
+            return text
         
-        for word in words:
+        # Split and translate in one pass
+        result_words = []
+        for word in text.split():
+            # Minimal cleaning for speed
             clean_word = word.lower().strip('.,!?;:"()[]{}')
-            if clean_word in translations:
-                translated_words.append(translations[clean_word])
+            if clean_word and clean_word in translations:
+                result_words.append(translations[clean_word])
             else:
-                translated_words.append(word)
+                result_words.append(word)
         
-        return ' '.join(translated_words)
-    
-    def _translate_sentence(self, sentence: str, translations: Dict[str, str]) -> str:
-        """Fast sentence translation"""
-        words = sentence.split()
-        translated_words = []
-        
-        for word in words:
-            clean_word = word.lower().strip('.,!?;:"()[]{}')
-            if clean_word in translations:
-                translated_words.append(translations[clean_word])
-            else:
-                translated_words.append(word)
-        
-        return ' '.join(translated_words)
+        return ' '.join(result_words)
     
     def get_supported_languages(self) -> List[Dict[str, str]]:
         """Get list of supported regional languages"""
