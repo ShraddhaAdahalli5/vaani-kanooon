@@ -493,7 +493,7 @@ class OfflineAIService:
         return '. '.join(simplified_sentences)
     
     def translate_to_regional_language(self, text: str, target_language: str) -> str:
-        """Lightning-fast translation using optimized processing"""
+        """Super-fast translation for presentation"""
         if not text:
             return ""
         
@@ -501,13 +501,75 @@ class OfflineAIService:
         if target_language == "english" or target_language == "en":
             return text
         
-        if target_language not in self.regional_translations:
+        # Simple fallback translations for presentation
+        if target_language == "hindi":
+            return self._simple_hindi_translate(text)
+        elif target_language == "kannada":
+            return self._simple_kannada_translate(text)
+        elif target_language == "tamil":
+            return self._simple_tamil_translate(text)
+        elif target_language == "telugu":
+            return self._simple_telugu_translate(text)
+        elif target_language == "marathi":
+            return self._simple_marathi_translate(text)
+        else:
             return text  # Return original if language not supported
+    
+    def _simple_hindi_translate(self, text: str) -> str:
+        """Simple Hindi translation for presentation"""
+        hindi_words = {
+            "legal": "कानूनी", "document": "दस्तावेज", "agreement": "समझौता",
+            "contract": "अनुबंध", "court": "अदालत", "judge": "न्यायाधीश",
+            "lawyer": "वकील", "party": "पक्ष", "property": "संपत्ति",
+            "land": "जमीन", "house": "घर", "money": "पैसे",
+            "payment": "भुगतान", "rights": "अधिकार", "duty": "कर्तव्य",
+            "the": "", "and": "और", "is": "है", "are": "हैं",
+            "this": "यह", "that": "वह", "for": "के लिए",
+            "with": "के साथ", "shall": "गा", "must": "जरूरी",
+            "will": "करेगा", "can": "सकता", "may": "सकता"
+        }
         
-        translations = self.regional_translations[target_language]
+        words = text.lower().split()
+        result = []
+        for word in words:
+            clean_word = word.strip('.,!?;:"()[]{}')
+            translated = hindi_words.get(clean_word, word)
+            result.append(translated)
+        return ' '.join(result)
+    
+    def _simple_kannada_translate(self, text: str) -> str:
+        """Simple Kannada translation for presentation"""
+        kannada_words = {
+            "legal": "ಕಾನೂನು", "document": "ದಾಖಲೆ", "agreement": "ಒಪ್ಪಂದ",
+            "contract": "ಒಪ್ಪಂದ", "court": "ನ್ಯಾಯಾಲಯ", "judge": "ನ್ಯಾಯಾಧೀಶ",
+            "lawyer": "ವಕೀಲ", "party": "ಪಕ್ಷ", "property": "ಆಸ್ತಿ",
+            "land": "ಭೂಮಿ", "house": "ಮನೆ", "money": "ಹಣ",
+            "payment": "ಪಾವತಿ", "rights": "ಹಕ್ಕುಗಳು", "duty": "ಕರ್ತವ್ಯ",
+            "the": "", "and": "ಮತ್ತು", "is": "ಆಗಿದೆ", "are": "ಆಗಿವೆ",
+            "this": "ಇದು", "that": "ಅದು", "for": "ಗಾಗಿ",
+            "with": "ಜೊತೆ", "shall": "ಆಗಿದೆ", "must": "ಅಗತ್ಯ",
+            "will": "ಮಾಡುತ್ತದೆ", "can": "ಸಾಧ್ಯ", "may": "ಸಾಧ್ಯ"
+        }
         
-        # Ultra-fast direct translation
-        return self._ultra_fast_translate(text, translations)
+        words = text.lower().split()
+        result = []
+        for word in words:
+            clean_word = word.strip('.,!?;:"()[]{}')
+            translated = kannada_words.get(clean_word, word)
+            result.append(translated)
+        return ' '.join(result)
+    
+    def _simple_tamil_translate(self, text: str) -> str:
+        """Simple Tamil translation for presentation"""
+        return text  # Placeholder for now
+    
+    def _simple_telugu_translate(self, text: str) -> str:
+        """Simple Telugu translation for presentation"""
+        return text  # Placeholder for now
+    
+    def _simple_marathi_translate(self, text: str) -> str:
+        """Simple Marathi translation for presentation"""
+        return text  # Placeholder for now
     
     def _ultra_fast_translate(self, text: str, translations: Dict[str, str]) -> str:
         """Ultra-fast direct translation"""
