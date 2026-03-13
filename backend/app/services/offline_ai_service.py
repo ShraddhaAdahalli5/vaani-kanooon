@@ -49,7 +49,6 @@ class OfflineAIService:
     def _load_simple_vocabulary(self) -> Dict[str, str]:
         """Load simple word replacements"""
         return {
-            "hereinafter": "from now on",
             "whereas": "because",
             "notwithstanding": "despite",
             "heretofore": "until now",
@@ -76,6 +75,104 @@ class OfflineAIService:
             "expire": "end",
             "renew": "continue",
             "extend": "make longer",
+            "document": "paper",
+            "agreement": "deal",
+            "contract": "deal",
+            "shall": "must",
+            "must": "must",
+            "will": "will",
+            "may": "can",
+            "can": "can",
+            "should": "should",
+            "could": "could",
+            "would": "would",
+            "person": "people",
+            "party": "side",
+            "parties": "sides",
+            "court": "court",
+            "judge": "judge",
+            "lawyer": "lawyer",
+            "case": "case",
+            "evidence": "proof",
+            "witness": "witness",
+            "justice": "justice",
+            "rights": "rights",
+            "duty": "duty",
+            "property": "property",
+            "land": "land",
+            "house": "house",
+            "money": "money",
+            "loan": "loan",
+            "interest": "interest",
+            "payment": "payment",
+            "fine": "fine",
+            "punishment": "punishment",
+            "prison": "jail",
+            "freedom": "freedom",
+            "equality": "equality",
+            "the": "the",
+            "and": "and",
+            "or": "or",
+            "but": "but",
+            "if": "if",
+            "when": "when",
+            "where": "where",
+            "why": "why",
+            "how": "how",
+            "what": "what",
+            "who": "who",
+            "which": "which",
+            "this": "this",
+            "that": "that",
+            "these": "these",
+            "those": "those",
+            "is": "is",
+            "are": "are",
+            "was": "was",
+            "were": "were",
+            "be": "be",
+            "been": "been",
+            "being": "being",
+            "have": "have",
+            "has": "has",
+            "had": "had",
+            "do": "do",
+            "does": "does",
+            "did": "did",
+            "will": "will",
+            "would": "would",
+            "shall": "shall",
+            "should": "should",
+            "can": "can",
+            "could": "could",
+            "may": "may",
+            "might": "might",
+            "must": "must",
+            "ought": "ought",
+            "i": "i",
+            "you": "you",
+            "he": "he",
+            "she": "she",
+            "it": "it",
+            "we": "we",
+            "they": "they",
+            "me": "me",
+            "him": "him",
+            "her": "her",
+            "us": "us",
+            "them": "them",
+            "my": "my",
+            "your": "your",
+            "his": "his",
+            "her": "her",
+            "its": "its",
+            "our": "our",
+            "their": "their",
+            "mine": "mine",
+            "yours": "yours",
+            "hers": "hers",
+            "ours": "ours",
+            "theirs": "theirs",
         }
     
     def _load_regional_translations(self) -> Dict[str, Dict[str, str]]:
@@ -97,15 +194,60 @@ class OfflineAIService:
                 "property": "संपत्ति",
                 "land": "जमीन",
                 "house": "घर",
-                "money": "पैसा",
-                "loan": "ऋण",
-                "interest": "ब्याज",
-                "payment": "भुगतान",
-                "fine": "जुर्माना",
-                "punishment": "सजा",
-                "prison": "जेल",
-                "freedom": "आजादी",
+                "money": "पैसे",
+                "loan": "कर्ज",
+                "interest": "व्याज",
+                "payment": "भरणे",
+                "fine": "दंड",
+                "punishment": "शिक्षा",
+                "prison": "तुरुंग",
+                "freedom": "स्वातंत्र्य",
                 "equality": "समानता",
+                "document": "दस्तावेज",
+                "paper": "कागज",
+                "deal": "सौदा",
+                "must": "जरूरी",
+                "can": "सकता",
+                "will": "करेगा",
+                "people": "लोग",
+                "side": "पक्ष",
+                "proof": "सबूत",
+                "jail": "जेल",
+                "the": "",
+                "and": "और",
+                "or": "या",
+                "but": "लेकिन",
+                "if": "अगर",
+                "when": "जब",
+                "where": "कहां",
+                "why": "क्यों",
+                "how": "कैसे",
+                "what": "क्या",
+                "who": "कौन",
+                "this": "यह",
+                "that": "वह",
+                "is": "है",
+                "are": "हैं",
+                "was": "था",
+                "were": "थे",
+                "have": "है",
+                "has": "है",
+                "had": "था",
+                "do": "करो",
+                "does": "करता",
+                "did": "किया",
+                "i": "मैं",
+                "you": "तुम",
+                "he": "वह",
+                "she": "वह",
+                "we": "हम",
+                "they": "वे",
+                "my": "मेरा",
+                "your": "तुम्हारा",
+                "his": "उसका",
+                "her": "उसकी",
+                "our": "हमारा",
+                "their": "उनका",
             },
             "kannada": {
                 "legal document": "ಕಾನೂನು ದಾಖಲೆ",
@@ -132,6 +274,51 @@ class OfflineAIService:
                 "prison": "ಜೈಲು",
                 "freedom": "ಸ್ವಾತಂತ್ರ್ಯ",
                 "equality": "ಸಮಾನತೆ",
+                "document": "ದಾಖಲೆ",
+                "paper": "ಕಾಗದ",
+                "deal": "ಒಪ್ಪಂದ",
+                "must": "ಅಗತ್ಯ",
+                "can": "ಸಾಧ್ಯ",
+                "will": "ಮಾಡುತ್ತದೆ",
+                "people": "ಜನರು",
+                "side": "ಪಕ್ಷ",
+                "proof": "ಸಾಬೀತು",
+                "jail": "ಜೈಲು",
+                "the": "",
+                "and": "ಮತ್ತು",
+                "or": "ಅಥವಾ",
+                "but": "ಆದರೆ",
+                "if": "ಆದರೆ",
+                "when": "ಯಾವಾಗ",
+                "where": "ಎಲ್ಲಿ",
+                "why": "ಏಕೆ",
+                "how": "ಹೇಗೆ",
+                "what": "ಏನು",
+                "who": "ಯಾರು",
+                "this": "ಇದು",
+                "that": "ಅದು",
+                "is": "ಆಗಿದೆ",
+                "are": "ಆಗಿವೆ",
+                "was": "ಆಗಿತ್ತು",
+                "were": "ಆಗಿದ್ದವು",
+                "have": "ಹೊಂದಿದೆ",
+                "has": "ಹೊಂದಿದೆ",
+                "had": "ಹೊಂದಿತ್ತು",
+                "do": "ಮಾಡು",
+                "does": "ಮಾಡುತ್ತದೆ",
+                "did": "ಮಾಡಿದರು",
+                "i": "ನಾನು",
+                "you": "ನೀವು",
+                "he": "ಅವನು",
+                "she": "ಅವಳು",
+                "we": "ನಾವು",
+                "they": "ಅವರು",
+                "my": "ನನ್ನ",
+                "your": "ನಿಮ್ಮ",
+                "his": "ಅವನ",
+                "her": "ಅವಳ",
+                "our": "ನಮ್ಮ",
+                "their": "ಅವರ",
             },
             "marathi": {
                 "legal document": "कायदेशीर दस्तऐवज",
@@ -256,7 +443,7 @@ class OfflineAIService:
         return '. '.join(simplified_sentences)
     
     def translate_to_regional_language(self, text: str, target_language: str) -> str:
-        """Translate text to regional language using offline dictionary"""
+        """Optimized translation using word-level processing"""
         if not text:
             return ""
         
@@ -264,17 +451,27 @@ class OfflineAIService:
             return text  # Return original if language not supported
         
         translations = self.regional_translations[target_language]
-        translated = text
         
-        # Replace English words with regional translations
-        for english_word, regional_word in translations.items():
-            translated = re.sub(r'\b' + re.escape(english_word) + r'\b', regional_word, translated, flags=re.IGNORECASE)
+        # Split text into words and translate each word
+        words = text.split()
+        translated_words = []
         
-        return translated
+        for word in words:
+            # Clean word for matching
+            clean_word = word.lower().strip('.,!?;:"()[]{}')
+            
+            # Check if word exists in translation dictionary
+            if clean_word in translations:
+                translated_words.append(translations[clean_word])
+            else:
+                translated_words.append(word)
+        
+        return ' '.join(translated_words)
     
     def get_supported_languages(self) -> List[Dict[str, str]]:
         """Get list of supported regional languages"""
         return [
+            {"code": "english", "name": "English", "native": "English"},
             {"code": "hindi", "name": "हिन्दी (Hindi)", "native": "हिन्दी"},
             {"code": "kannada", "name": "ಕನ್ನಡ (Kannada)", "native": "ಕನ್ನಡ"},
             {"code": "marathi", "name": "मराठी (Marathi)", "native": "मराठी"},
@@ -288,8 +485,12 @@ class OfflineAIService:
             # Step 1: Simplify the legal text
             simplified_text = self.simplify_text(text)
             
-            # Step 2: Translate to regional language
-            translated_text = self.translate_to_regional_language(simplified_text, target_language)
+            # Step 2: Translate to regional language (only if different from English)
+            translated_text = ""
+            if target_language != "english":
+                translated_text = self.translate_to_regional_language(simplified_text, target_language)
+            else:
+                translated_text = simplified_text
             
             # Step 3: Generate summary (simple approach)
             summary = self._generate_simple_summary(simplified_text)

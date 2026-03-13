@@ -25,7 +25,7 @@ async def simplify_legal_text(request: SimplifyRequest):
         # Try offline service first (for rural areas)
         result = offline_ai_service.process_legal_document(
             request.text, 
-            request.target_language or "hindi"
+            request.target_language or "english"  # Default to English, not Hindi
         )
         
         return SimplifyResponse(
