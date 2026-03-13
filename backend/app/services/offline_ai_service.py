@@ -443,24 +443,55 @@ class OfflineAIService:
         return '. '.join(simplified_sentences)
     
     def translate_to_regional_language(self, text: str, target_language: str) -> str:
-        """Optimized translation using word-level processing"""
+        """Ultra-fast translation using optimized processing"""
         if not text:
             return ""
+        
+        # Early return for English - no translation needed
+        if target_language == "english" or target_language == "en":
+            return text
         
         if target_language not in self.regional_translations:
             return text  # Return original if language not supported
         
         translations = self.regional_translations[target_language]
         
-        # Split text into words and translate each word
+        # For very short texts, process immediately
+        if len(text) < 50:
+            return self._translate_short_text(text, translations)
+        
+        # For longer texts, use sentence-based processing
+        sentences = text.split('. ')
+        translated_sentences = []
+        
+        for sentence in sentences:
+            if sentence.strip():
+                translated_sentence = self._translate_sentence(sentence.strip(), translations)
+                translated_sentences.append(translated_sentence)
+        
+        return '. '.join(translated_sentences)
+    
+    def _translate_short_text(self, text: str, translations: Dict[str, str]) -> str:
+        """Fast translation for short texts"""
         words = text.split()
         translated_words = []
         
         for word in words:
-            # Clean word for matching
             clean_word = word.lower().strip('.,!?;:"()[]{}')
-            
-            # Check if word exists in translation dictionary
+            if clean_word in translations:
+                translated_words.append(translations[clean_word])
+            else:
+                translated_words.append(word)
+        
+        return ' '.join(translated_words)
+    
+    def _translate_sentence(self, sentence: str, translations: Dict[str, str]) -> str:
+        """Fast sentence translation"""
+        words = sentence.split()
+        translated_words = []
+        
+        for word in words:
+            clean_word = word.lower().strip('.,!?;:"()[]{}')
             if clean_word in translations:
                 translated_words.append(translations[clean_word])
             else:
@@ -485,12 +516,17 @@ class OfflineAIService:
             # Step 1: Simplify the legal text
             simplified_text = self.simplify_text(text)
             
-            # Step 2: Translate to regional language (only if different from English)
+            # Step 2: Translate to regional language (optimized)
             translated_text = ""
-            if target_language != "english":
-                translated_text = self.translate_to_regional_language(simplified_text, target_language)
-            else:
+            if target_language == "english" or target_language == "en":
+                # Fast path for English - no translation needed
                 translated_text = simplified_text
+            else:
+                # Only translate if not English and language is supported
+                if target_language in self.regional_translations:
+                    translated_text = self.translate_to_regional_language(simplified_text, target_language)
+                else:
+                    translated_text = simplified_text
             
             # Step 3: Generate summary (simple approach)
             summary = self._generate_simple_summary(simplified_text)
